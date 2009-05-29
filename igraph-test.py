@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import igraph
 from time import ctime
 import sys
