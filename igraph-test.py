@@ -2,7 +2,10 @@
 
 import igraph
 from time import ctime
+from getopt import *
 import sys
+
+## GLOBAL VARIABLES
 
 def printInDegree(g):
     indegree = g.degree(type=igraph.IN)
@@ -27,33 +30,59 @@ def printAverageDistance(g):
     print "Average distance: %f" % avg_dist
 
 
-def help(er):
+def usage(error = 0):
     print "SYNTAX: test.py filename"
     print ""
 
-    sys.exit(er)
+    sys.exit(error)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        help(1)
+    try:                                
+        opts, args = getopt(sys.argv[1:], "hdeir", ["help", "details", "degree", "distance", 'density']) 
+    except GetoptError:
+        usage(2)
 
-    fn = sys.argv[1]
+    if len(args) != 1:
+        usage(1)
+
+    _details = _degree = _distance = _density = False
+    for opt, arg in opts:
+        if opt in ('-d', '--details'):
+            _details = True
+        if opt in ('-e', '--degree'):
+            _degree = True
+        if opt in ('-i', '--distance'):
+            _distance = True
+        if opt in ('-r', '--density'):
+            _density = True
+
+    fn = args[0]
     g = igraph.load(fn)
 
-    print "Vertex: %d" % (len(g.vs),)
-    print "Edge: %d" % (len(g.es),)
+    if _details:
+        print "Vertex: %d" % (len(g.vs),)
+        print "Edge: %d" % (len(g.es),)
 
-    printInDegree(g)
-    printOutDegree(g)
+    if _density:
+        print "Density: %f" % (g.density(),)
 
-    cl = g.clusters()
+        lenvs = len(g.vs)
+        print "Calculated density: %f" % (1.*len(g.es)/lenvs/(lenvs-1))
+        print ""
 
-    giant = cl.giant()
-    print "Length max cluster: %d" % (len(giant.vs), )
+    if _degree:
+        printInDegree(g)
+        printOutDegree(g)
 
-    #printAverageDistance(giant)
+    if _distance:
+        cl = g.clusters()
 
-    #print "Average distance 2: %f" % giant.average_path_length(True, False)
+        giant = cl.giant()
+        print "Length max cluster: %d" % (len(giant.vs), )
 
-    #print "Density: %f" % (g.density(),)
+        #printAverageDistance(giant)
+
+        #print "Average distance 2: %f" % giant.average_path_length(True, False)
+
+
