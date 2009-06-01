@@ -7,15 +7,22 @@ import sys
 
 ## GLOBAL VARIABLES
 
-def printInDegree(g):
-    indegree = g.degree(type=igraph.IN)
-    meanin = sum(indegree)*1./len(indegree)
-    print "Mean IN degree: %f" %(meanin,)
+def meanDegree(g, type):
+    degree = g.degree(type=type)
+    mean = 1.*sum(degree)/len(degree)
+    return mean
 
-def printOutDegree(g):
-    outdegree = g.degree(type=igraph.OUT)
-    meanout = sum(outdegree)*1./len(outdegree)
-    print "Mean OUT degree: %f" %(meanout,)
+
+def degreeVariance(g, type, mean):
+    '''
+g:      graph
+type:   type (igraph.IN or igraph.OUT)
+mean:   mean degree for this type
+'''
+    degree = g.degree(type=type)
+    variance = 1.*sum([(nodeDegree - mean)**2 for nodeDegree in degree])/len(g.vs)
+    return variance
+
 
 def printAverageDistance(g):
     print 'DISTANCES', ctime()
@@ -72,8 +79,14 @@ if __name__ == '__main__':
         print ""
 
     if _degree:
-        printInDegree(g)
-        printOutDegree(g)
+        mid = meanDegree(g, igraph.IN)
+        mod = meanDegree(g, igraph.OUT)
+
+        print "Mean IN degree: %f" % mid
+        print "Mean OUT degree: %f" % mod
+
+        print "Variance IN Degree: %f" % degreeVariance(g, igraph.IN, mid)
+        print "Variance OUT Degree: %f" % degreeVariance(g, igraph.OUT, mod)
 
     if _distance:
         cl = g.clusters()
