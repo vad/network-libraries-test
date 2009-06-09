@@ -5,7 +5,10 @@ from time import ctime
 from getopt import *
 import sys
 
+
 ## GLOBAL VARIABLES
+
+## FUNCTIONS
 
 def meanDegree(g, type):
     degree = g.degree(type=type)
