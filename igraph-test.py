@@ -4,6 +4,7 @@ import igraph
 from time import ctime
 from getopt import *
 import sys
+import gc
 
 ## GLOBAL VARIABLES
 
@@ -29,15 +30,17 @@ mean:   mean degree for this type
 def printAverageDistance(g):
     print 'DISTANCES', ctime()
     dSum = 0
-    print 'Len:', len(g.vs)
-    for i in range(len(g.vs)):
+    step = 1000
+    n = len(g.vs)
+    for i in range(0, n, step):
         if not i % 100:
             print 'Step:', i
+            print 1.*dSum*step/i
+        uplimit = min(n, i+step)
+        
+        dSum += 1.*sum([sum(d) for d in g.shortest_paths(range(i, uplimit), weights='weight')]) / (n-1) / (uplimit - i)
 
-        dSum += sum(g.shortest_paths_dijkstra(i, weights='weight')[0])
-
-    print 'AVERAGE', ctime()
-    avg_dist = 1.*dSum / (len(g.vs) * (len(g.vs)-1))
+    avg_dist = 1.*dSum / len(range(0, n, step))
     print "Average distance: %f" % avg_dist
 
 
@@ -78,10 +81,10 @@ if __name__ == '__main__':
         print "Edge: %d" % (len(g.es),)
 
     if _density:
-        print "Density: %f" % (g.density(),)
+        print "Density: %.10f" % (g.density(),)
 
         lenvs = len(g.vs)
-        print "Calculated density: %f" % (1.*len(g.es)/lenvs/(lenvs-1))
+        print "Calculated density: %.10f" % (1.*len(g.es)/lenvs/(lenvs-1))
         print ""
 
     if _degree:
@@ -105,5 +108,5 @@ if __name__ == '__main__':
         printAverageDistance(giant)
 
         #print "Average distance 2: %f" % giant.average_path_length(True, False)
-
+    print 'END', ctime()
 
